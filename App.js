@@ -1,7 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, ScrollView, StatusBar, View } from 'react-native';
+import { StyleSheet, Animated, Text, ScrollView, StatusBar, View } from 'react-native';
 
 export default class App extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            scrollY: new Animated.Value(0)
+        };
+    }
 
     renderRow(num = 1) {
         return [...Array(num)].map((val, index) => {
@@ -16,17 +24,27 @@ export default class App extends React.Component {
     }
 
     render() {
+        const { scrollY } = this.state;
+        const headerTop = scrollY.interpolate({
+            inputRange: [0, 100],
+            outputRange: [0, 100]
+        });
+        const headerStyle = { transform: [{ translateY: headerTop }] };
+
         return (
             <View style={styles.container}>
                 <StatusBar hidden />
-                <View style={styles.header}>
+                <Animated.View style={[styles.header, headerStyle]}>
                     <Text style={styles.textHeader}>
                         My header
                     </Text>
-                </View>
-                <ScrollView style={styles.scrollView}>
+                </Animated.View>
+                <Animated.ScrollView style={styles.scrollView}
+                    scrollEventThrottle={1}
+                    onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+                >
                     {this.renderRow(20)}
-                </ScrollView>
+                </Animated.ScrollView>
             </View>
         );
     }
